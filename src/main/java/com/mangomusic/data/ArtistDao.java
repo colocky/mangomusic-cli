@@ -19,20 +19,18 @@ public class ArtistDao {
 
     public List<Artist> searchArtists(String searchTerm) {
         List<Artist> artists = new ArrayList<>();
+
         String query = "SELECT artist_id, name, primary_genre, formed_year " +
                 "FROM artists " +
                 "WHERE name LIKE ? " +
                 "ORDER BY name";
 
-        try {
-            Connection connection = dataManager.getConnection();
+        try (Connection connection = dataManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, "%" + searchTerm + "%");
 
-                statement.setString(1, "%" + searchTerm + "%");
-
-                ResultSet results = statement.executeQuery();
-
+            try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
                     int artistId = results.getInt("artist_id");
                     String name = results.getString("name");
